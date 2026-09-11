@@ -1,0 +1,8 @@
+node_modules
+client/node_modules
+client/dist
+.git
+.gemini
+*.log
+server/data/*.db*
+server/uploads/*
