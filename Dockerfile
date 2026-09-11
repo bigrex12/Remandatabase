@@ -3,12 +3,15 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Install root & client dependencies
+# Install build tools for native addons (better-sqlite3)
+RUN apk add --no-cache python3 make g++
+
+# Install dependencies
 COPY package*.json ./
-RUN npm ci
+RUN npm install
 
 COPY client/package*.json ./client/
-RUN npm --prefix client ci
+RUN npm --prefix client install
 
 # Copy source and build frontend
 COPY . .
@@ -21,17 +24,20 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=8080
 
-# Install production dependencies for server
+# Install runtime dependencies & node-gyp build tools for better-sqlite3
+RUN apk add --no-cache python3 make g++
+
 COPY package*.json ./
-RUN npm ci --omit=dev
+RUN npm install --omit=dev
 
 # Copy server and pre-built frontend distribution
 COPY server ./server
 COPY --from=builder /app/client/dist ./client/dist
 
-# Default persistent directories
+# Default persistent storage paths (can be overridden by Cloud Run env vars)
 ENV DATA_DIR=/app/server/data
 ENV UPLOADS_DIR=/app/server/uploads
+ENV SQLITE_JOURNAL_MODE=DELETE
 
 EXPOSE 8080
 
