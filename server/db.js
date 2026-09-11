@@ -19,7 +19,13 @@ if (!fs.existsSync(uploadsDir)) {
 const dbPath = path.join(dataDir, 'reman_tracker.db');
 const db = new Database(dbPath);
 
-db.pragma('journal_mode = WAL');
+const journalMode = process.env.SQLITE_JOURNAL_MODE || 'WAL';
+try {
+  db.pragma(`journal_mode = ${journalMode}`);
+} catch (e) {
+  console.log(`Fallback to DELETE journal mode for FUSE compatibility: ${e.message}`);
+  db.pragma('journal_mode = DELETE');
+}
 db.pragma('foreign_keys = ON');
 
 export function initDatabase() {
