@@ -1,7 +1,7 @@
 const API_BASE = '/api';
 
 export async function fetchStats() {
-  const res = await fetch(`${API_BASE}/repairs/stats/summary`);
+  const res = await fetch(`${API_BASE}/repairs/stats/summary`, { cache: 'no-store' });
   if (!res.ok) throw new Error('Failed to fetch stats');
   return res.json();
 }
@@ -13,13 +13,13 @@ export async function fetchRepairs(params = {}) {
       query.append(key, val);
     }
   });
-  const res = await fetch(`${API_BASE}/repairs?${query.toString()}`);
+  const res = await fetch(`${API_BASE}/repairs?${query.toString()}`, { cache: 'no-store' });
   if (!res.ok) throw new Error('Failed to fetch repairs');
   return res.json();
 }
 
 export async function fetchRepairById(id) {
-  const res = await fetch(`${API_BASE}/repairs/${id}`);
+  const res = await fetch(`${API_BASE}/repairs/${id}`, { cache: 'no-store' });
   if (!res.ok) throw new Error('Failed to fetch repair details');
   return res.json();
 }
@@ -53,6 +53,12 @@ export async function updateRepair(id, data) {
 export async function deleteRepair(id) {
   const res = await fetch(`${API_BASE}/repairs/${id}`, { method: 'DELETE' });
   if (!res.ok) throw new Error('Failed to delete repair');
+  return res.json();
+}
+
+export async function clearAllRepairs() {
+  const res = await fetch(`${API_BASE}/repairs/clear-all`, { method: 'POST' });
+  if (!res.ok) throw new Error('Failed to clear all repairs');
   return res.json();
 }
 

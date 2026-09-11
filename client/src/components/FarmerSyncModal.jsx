@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { X, RefreshCw, Clipboard, CheckCircle2, AlertCircle, Search, Database } from 'lucide-react';
-import { fetchSyncStatus, triggerFarmerSync, importPastedFarmers, fetchFarmers } from '../utils/api';
+import { X, RefreshCw, Clipboard, CheckCircle2, AlertCircle, Search, Database, Trash2 } from 'lucide-react';
+import { fetchSyncStatus, triggerFarmerSync, importPastedFarmers, fetchFarmers, clearAllRepairs } from '../utils/api';
 import { formatDate } from '../utils/formatters';
 
 export function FarmerSyncModal({ isOpen, onClose, onSyncComplete }) {
@@ -19,6 +19,7 @@ export function FarmerSyncModal({ isOpen, onClose, onSyncComplete }) {
   const [farmersList, setFarmersList] = useState([]);
   const [listSearch, setListSearch] = useState('');
   const [loadingList, setLoadingList] = useState(false);
+  const [clearingOrders, setClearingOrders] = useState(false);
 
   const loadStatus = async () => {
     try {
@@ -89,6 +90,24 @@ export function FarmerSyncModal({ isOpen, onClose, onSyncComplete }) {
     }
   };
 
+  const handleClearAllRepairs = async () => {
+    if (!window.confirm('Are you sure you want to permanently clear all repair orders? This gives you a 100% clean slate. Registered farms, vendors, and technicians will remain safe.')) {
+      return;
+    }
+    setClearingOrders(true);
+    setError(null);
+    setSuccessMsg(null);
+    try {
+      await clearAllRepairs();
+      setSuccessMsg('All repair orders cleared successfully! Database is now a clean slate.');
+      if (onSyncComplete) onSyncComplete();
+    } catch (err) {
+      setError(err.message || 'Failed to clear repairs');
+    } finally {
+      setClearingOrders(false);
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm overflow-y-auto">
       <div className="bg-[#101624] border border-[#1E293B] rounded-2xl w-full max-w-3xl shadow-2xl overflow-hidden my-8">
@@ -99,7 +118,7 @@ export function FarmerSyncModal({ isOpen, onClose, onSyncComplete }) {
             <div className="flex items-center gap-2">
               <Database className="w-5 h-5 text-indigo-400" />
               <h2 className="text-base font-bold text-white">
-                WAKA Farm List Synchronization
+                WAKA Farm List & Data Maintenance
               </h2>
             </div>
             <p className="text-xs text-slate-400 mt-0.5">
@@ -145,6 +164,16 @@ export function FarmerSyncModal({ isOpen, onClose, onSyncComplete }) {
             }`}
           >
             View Cached Farms ({syncStatus?.total_farmers ?? 0})
+          </button>
+          <button
+            onClick={() => setActiveTab('maintenance')}
+            className={`py-3 px-4 text-xs font-semibold border-b-2 transition-all cursor-pointer ${
+              activeTab === 'maintenance'
+                ? 'border-rose-500 text-rose-300'
+                : 'border-transparent text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            Clean Slate / Purge
           </button>
         </div>
 
@@ -294,6 +323,39 @@ export function FarmerSyncModal({ isOpen, onClose, onSyncComplete }) {
                     </div>
                   </div>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {/* Tab 4: Clean Slate / Purge */}
+          {activeTab === 'maintenance' && (
+            <div className="space-y-4">
+              <div className="p-4 rounded-xl bg-rose-950/20 border border-rose-900/60 text-xs space-y-2">
+                <div className="flex items-center gap-2 font-bold text-rose-400 text-sm">
+                  <Trash2 className="w-4 h-4" />
+                  <span>Purge All Sample / Test Repairs</span>
+                </div>
+                <p className="text-slate-300">
+                  Use this option to remove all logged repair orders, timeline events, and uploaded photos from the system.
+                </p>
+                <p className="text-slate-400 text-[11px]">
+                  ✓ <strong>Preserved Data:</strong> All WAKA Farms, Technicians, and Vendors are completely preserved and will NOT be deleted.
+                </p>
+              </div>
+
+              <div className="p-4 rounded-xl bg-[#0B0F17] border border-[#1E293B] flex items-center justify-between">
+                <div>
+                  <div className="font-bold text-white text-xs">Clear All Orders (Clean Slate)</div>
+                  <div className="text-[11px] text-slate-400">Permanently reset the repairs table to 0 entries.</div>
+                </div>
+                <button
+                  onClick={handleClearAllRepairs}
+                  disabled={clearingOrders}
+                  className="px-4 py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-500 disabled:bg-slate-800 rounded-xl shadow-md shadow-rose-600/20 transition-all cursor-pointer flex items-center gap-1.5"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>{clearingOrders ? 'Clearing...' : 'Purge All Repair Orders'}</span>
+                </button>
               </div>
             </div>
           )}

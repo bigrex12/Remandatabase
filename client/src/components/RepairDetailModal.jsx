@@ -46,7 +46,8 @@ export function RepairDetailModal({
       const data = await fetchRepairById(repairId);
       setRepair(data);
     } catch (err) {
-      setError(err.message || 'Failed to load repair details');
+      setError(err.message || 'This record is no longer available in the database.');
+      if (onRepairUpdated) onRepairUpdated();
     } finally {
       setLoading(false);
     }
@@ -97,7 +98,32 @@ export function RepairDetailModal({
     );
   }
 
-  if (!repair) return null;
+  if (error || !repair) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
+        <div className="bg-[#101624] border border-[#1E293B] rounded-2xl p-6 text-center max-w-sm w-full space-y-4 shadow-2xl">
+          <div className="w-12 h-12 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center mx-auto">
+            <AlertCircle className="w-6 h-6" />
+          </div>
+          <div>
+            <h3 className="text-sm font-bold text-white">Record Not Found</h3>
+            <p className="text-xs text-slate-400 mt-1">
+              {error || 'This order was removed or purged from the database.'}
+            </p>
+          </div>
+          <button
+            onClick={() => {
+              if (onRepairUpdated) onRepairUpdated();
+              onClose();
+            }}
+            className="w-full py-2 px-4 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl transition-all cursor-pointer"
+          >
+            Close & Refresh Table
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const statusInfo = getStatusBadge(repair.status);
   const intendedRoute = getIntendedRouteLabel(repair.intended_return_route);
