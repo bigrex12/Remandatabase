@@ -50,6 +50,12 @@ export async function updateRepair(id, data) {
   return res.json();
 }
 
+export async function deleteRepair(id) {
+  const res = await fetch(`${API_BASE}/repairs/${id}`, { method: 'DELETE' });
+  if (!res.ok) throw new Error('Failed to delete repair');
+  return res.json();
+}
+
 export async function returnCheckInRepair(id, data) {
   const res = await fetch(`${API_BASE}/repairs/${id}/return-checkin`, {
     method: 'POST',

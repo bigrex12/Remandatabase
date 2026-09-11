@@ -16,9 +16,10 @@ import {
   CheckCircle2, 
   AlertCircle,
   FileText,
-  Target
+  Target,
+  Trash2
 } from 'lucide-react';
-import { fetchRepairById, uploadRepairPhotos, updateBilling } from '../utils/api';
+import { fetchRepairById, uploadRepairPhotos, updateBilling, deleteRepair } from '../utils/api';
 import { formatDate, formatCurrency, getStatusBadge, getIntendedRouteLabel, getBillingStatusBadge } from '../utils/formatters';
 
 export function RepairDetailModal({
@@ -54,6 +55,17 @@ export function RepairDetailModal({
   useEffect(() => {
     loadDetails();
   }, [repairId]);
+
+  const handleDelete = async () => {
+    if (!window.confirm(`Are you sure you want to permanently delete ticket ${repair?.ticket_number}?`)) return;
+    try {
+      await deleteRepair(repairId);
+      if (onRepairUpdated) onRepairUpdated();
+      onClose();
+    } catch (err) {
+      alert('Delete failed: ' + err.message);
+    }
+  };
 
   const handlePhotoUpload = async (e) => {
     const files = Array.from(e.target.files || []);
@@ -123,6 +135,15 @@ export function RepairDetailModal({
               <QrCode className="w-3.5 h-3.5" />
               <span>Print Tag / QR</span>
             </button>
+
+            <button
+              onClick={handleDelete}
+              className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-rose-950/40 rounded-lg transition-colors cursor-pointer"
+              title="Delete this repair entry"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+
             <button
               onClick={onClose}
               className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors cursor-pointer"

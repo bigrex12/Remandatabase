@@ -777,4 +777,27 @@ router.get('/export/csv', (req, res) => {
   }
 });
 
+// DELETE /api/repairs/:id - Delete single repair record
+router.delete('/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    db.prepare('DELETE FROM repairs WHERE id = ?').run(id);
+    res.json({ success: true, id });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/repairs/clear-all - Clear all repair entries (clean slate)
+router.post('/clear-all', (req, res) => {
+  try {
+    db.prepare('DELETE FROM repairs').run();
+    db.prepare('DELETE FROM repair_events').run();
+    db.prepare('DELETE FROM repair_photos').run();
+    res.json({ success: true, message: 'All repair entries cleared' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 export default router;
