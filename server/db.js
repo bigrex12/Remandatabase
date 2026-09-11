@@ -180,16 +180,6 @@ export function initDatabase() {
     CREATE INDEX IF NOT EXISTS idx_repair_photos_repair_id ON repair_photos(repair_id);
   `);
 
-  // Automatically purge legacy sample repair tickets from persistent cloud storage bucket
-  try {
-    db.prepare(`
-      DELETE FROM repairs 
-      WHERE ticket_number IN ('RMN-2026-0001', 'RMN-2026-0002', 'RMN-2026-0003', 'RMN-2026-0004', 'RMN-2026-0005')
-    `).run();
-  } catch (e) {
-    console.log('Purge check:', e.message);
-  }
-
   seedInitialData();
 }
 
