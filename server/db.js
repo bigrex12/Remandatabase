@@ -17,16 +17,24 @@ if (!fs.existsSync(uploadsDir)) {
 }
 
 const dbPath = path.join(dataDir, 'reman_tracker.db');
-const db = new Database(dbPath);
+const db = new Database(dbPath, { timeout: 10000 });
 
-const journalMode = process.env.SQLITE_JOURNAL_MODE || 'WAL';
+// Configure Pragmas optimized for GCS FUSE and Network Mounts
 try {
+  const journalMode = process.env.SQLITE_JOURNAL_MODE || 'MEMORY';
   db.pragma(`journal_mode = ${journalMode}`);
 } catch (e) {
-  console.log(`Fallback to DELETE journal mode for FUSE compatibility: ${e.message}`);
-  db.pragma('journal_mode = DELETE');
+  console.log(`Journal mode setting notice: ${e.message}`);
 }
-db.pragma('foreign_keys = ON');
+
+try {
+  db.pragma('temp_store = MEMORY');
+  db.pragma('synchronous = NORMAL');
+  db.pragma('busy_timeout = 10000');
+  db.pragma('foreign_keys = ON');
+} catch (e) {
+  console.log(`Pragma config notice: ${e.message}`);
+}
 
 export function initDatabase() {
   // 1. Farmers table (Matching WAKA Sheet: Farm ID, Farm Name, Address)

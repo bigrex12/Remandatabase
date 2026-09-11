@@ -49,9 +49,38 @@ app.get('/api/stats', (req, res) => {
   res.redirect('/api/repairs/stats/summary');
 });
 
-// Health check
+// Health check & Storage Diagnostics
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', time: new Date().toISOString() });
+  let isWritable = false;
+  let journalMode = 'unknown';
+  let writeError = null;
+
+  try {
+    const row = db.pragma('journal_mode', { simple: true });
+    journalMode = row;
+    
+    // Quick probe write test
+    db.prepare(`
+      CREATE TABLE IF NOT EXISTS _health_check (
+        id INTEGER PRIMARY KEY,
+        checked_at TEXT
+      )
+    `).run();
+    db.prepare('INSERT OR REPLACE INTO _health_check (id, checked_at) VALUES (1, datetime("now"))').run();
+    isWritable = true;
+  } catch (err) {
+    writeError = err.message;
+  }
+
+  res.json({
+    status: isWritable ? 'ok' : 'readonly_error',
+    time: new Date().toISOString(),
+    data_dir: process.env.DATA_DIR || 'default',
+    uploads_dir: process.env.UPLOADS_DIR || 'default',
+    journal_mode: journalMode,
+    is_writable: isWritable,
+    write_error: writeError
+  });
 });
 
 // Serve frontend build if client/dist exists
