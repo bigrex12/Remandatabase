@@ -133,21 +133,21 @@ export function RepairDetailModal({
   const isInFloat = repair.status === 'IN_FLOAT_STOCK';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm overflow-y-auto">
-      <div className="bg-[#101624] border border-[#1E293B] rounded-2xl w-full max-w-4xl shadow-2xl overflow-hidden my-8">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto">
+      <div className="bg-[#141E32] border border-[#2A3B5A] rounded-2xl w-full max-w-4xl shadow-2xl overflow-hidden my-8">
         
         {/* Header */}
-        <div className="px-6 py-4 border-b border-[#1E293B] flex items-center justify-between bg-[#0E131F]">
-          <div className="flex items-center gap-3">
-            <span className="text-xs font-mono font-bold text-indigo-300 bg-indigo-950/80 px-2.5 py-1 rounded-lg border border-indigo-700/60">
+        <div className="px-6 py-5 border-b border-[#2A3B5A] flex items-center justify-between bg-[#0E1626]">
+          <div className="flex items-center gap-3.5">
+            <span className="text-sm font-mono font-extrabold text-indigo-200 bg-indigo-950/90 px-3 py-1.5 rounded-xl border border-indigo-500/70 shadow-sm">
               {repair.ticket_number}
             </span>
             <div>
-              <h2 className="text-base font-bold text-white flex items-center gap-2">
+              <h2 className="text-lg font-black text-white flex items-center gap-2">
                 {repair.part_name}
               </h2>
-              <div className="text-xs text-slate-400 font-mono">
-                {repair.part_number && <span className="mr-2">OEM: {repair.part_number}</span>}
+              <div className="text-sm text-slate-300 font-mono font-medium mt-0.5">
+                {repair.part_number && <span className="mr-3">OEM: {repair.part_number}</span>}
                 {repair.serial_number && <span>SN: {repair.serial_number}</span>}
               </div>
             </div>
@@ -156,23 +156,23 @@ export function RepairDetailModal({
           <div className="flex items-center gap-2">
             <button
               onClick={() => onOpenPrintModal(repair)}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-300 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg transition-all cursor-pointer"
+              className="flex items-center gap-2 px-3.5 py-2 text-sm font-bold text-slate-200 bg-[#1C2A46] hover:bg-[#25385E] border border-[#384E77] rounded-xl transition-all cursor-pointer shadow-sm"
             >
-              <QrCode className="w-3.5 h-3.5" />
+              <QrCode className="w-4 h-4" />
               <span>Print Tag / QR</span>
             </button>
 
             <button
               onClick={handleDelete}
-              className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-rose-950/40 rounded-lg transition-colors cursor-pointer"
+              className="p-2 text-slate-300 hover:text-rose-300 hover:bg-rose-950/60 border border-transparent hover:border-rose-800 rounded-xl transition-colors cursor-pointer"
               title="Delete this repair entry"
             >
-              <Trash2 className="w-4 h-4" />
+              <Trash2 className="w-4.5 h-4.5" />
             </button>
 
             <button
               onClick={onClose}
-              className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors cursor-pointer"
+              className="p-2 text-slate-300 hover:text-white rounded-xl hover:bg-slate-700/60 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -186,75 +186,75 @@ export function RepairDetailModal({
           <div className="lg:col-span-7 space-y-6">
             
             {/* Provenance Chain Summary */}
-            <div className="p-4 rounded-xl bg-[#0B0F17] border border-[#1E293B] space-y-3">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+            <div className="p-5 rounded-2xl bg-[#0D1524] border border-[#23334F] space-y-3.5 shadow-sm">
+              <h3 className="text-xs font-black uppercase tracking-wider text-slate-300">
                 Customer & Location Provenance
               </h3>
               
-              <div className="grid grid-cols-2 gap-3 text-xs">
+              <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <div className="text-slate-500 text-[11px]">Original Customer</div>
-                  <div className="font-semibold text-purple-300">
+                  <div className="text-slate-400 text-xs font-semibold">Original Customer</div>
+                  <div className="font-bold text-purple-200 mt-0.5">
                     {repair.original_farmer_name || 'Stock Inventory'}
                     {repair.original_farmer_code && ` [${repair.original_farmer_code}]`}
                   </div>
                   {repair.original_farmer_address && (
-                    <div className="text-[10px] text-slate-500">{repair.original_farmer_address}</div>
+                    <div className="text-xs text-slate-400 mt-0.5">{repair.original_farmer_address}</div>
                   )}
                 </div>
 
                 <div>
-                  <div className="text-slate-500 text-[11px]">Current Location / Destination</div>
-                  <div className="font-semibold text-teal-300">
+                  <div className="text-slate-400 text-xs font-semibold">Current Location / Destination</div>
+                  <div className="font-bold text-teal-200 mt-0.5">
                     {repair.current_location || 'Parts Shop'}
                   </div>
                   {repair.shelf_bin_location && (
-                    <div className="text-[10px] text-amber-400">📍 {repair.shelf_bin_location}</div>
+                    <div className="text-xs font-bold text-amber-300 mt-0.5">📍 {repair.shelf_bin_location}</div>
                   )}
                 </div>
               </div>
 
-              <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between text-xs">
-                <span className="text-slate-400">Pre-Tagged Intended Route:</span>
-                <span className="font-semibold text-emerald-300 flex items-center gap-1">
-                  <Target className="w-3.5 h-3.5 text-emerald-400" />
+              <div className="pt-3 border-t border-[#1F2D45] flex items-center justify-between text-sm">
+                <span className="text-slate-300 font-medium">Pre-Tagged Intended Route:</span>
+                <span className="font-bold text-emerald-300 flex items-center gap-1.5">
+                  <Target className="w-4 h-4 text-emerald-400" />
                   {intendedRoute.label}
                 </span>
               </div>
             </div>
 
             {/* Board Fingerprinting */}
-            <div className="p-4 rounded-xl bg-[#0B0F17] border border-[#1E293B] space-y-2 text-xs">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+            <div className="p-5 rounded-2xl bg-[#0D1524] border border-[#23334F] space-y-2.5 text-sm shadow-sm">
+              <h3 className="text-xs font-black uppercase tracking-wider text-slate-300">
                 Physical Board Fingerprint
               </h3>
-              <div className="grid grid-cols-2 gap-2 font-mono">
-                <div>PCB Rev: <strong className="text-slate-200">{repair.pcb_revision || 'N/A'}</strong></div>
-                <div>Quantity: <strong className="text-slate-200">{repair.quantity || 1}</strong></div>
+              <div className="grid grid-cols-2 gap-3 font-mono">
+                <div>PCB Rev: <strong className="text-white font-bold">{repair.pcb_revision || 'N/A'}</strong></div>
+                <div>Quantity: <strong className="text-white font-bold">{repair.quantity || 1}</strong></div>
               </div>
               {repair.physical_markings && (
-                <div className="pt-1 text-slate-300">
-                  <span className="text-slate-500">Distinguishing Marks: </span>
-                  <span className="text-amber-300 font-medium">{repair.physical_markings}</span>
+                <div className="pt-1.5 text-slate-200">
+                  <span className="text-slate-400 font-semibold">Distinguishing Marks: </span>
+                  <span className="text-amber-300 font-bold">{repair.physical_markings}</span>
                 </div>
               )}
               {repair.initial_symptom && (
-                <div className="pt-1 text-slate-300">
-                  <span className="text-slate-500">Initial Issue: </span>
-                  <span>{repair.initial_symptom}</span>
+                <div className="pt-1.5 text-slate-200">
+                  <span className="text-slate-400 font-semibold">Initial Issue: </span>
+                  <span className="font-medium text-white">{repair.initial_symptom}</span>
                 </div>
               )}
             </div>
 
             {/* Photo Gallery */}
-            <div className="p-4 rounded-xl bg-[#0B0F17] border border-[#1E293B] space-y-3">
+            <div className="p-5 rounded-2xl bg-[#0D1524] border border-[#23334F] space-y-3.5 shadow-sm">
               <div className="flex items-center justify-between">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                  <Camera className="w-4 h-4 text-slate-400" />
+                <h3 className="text-xs font-black uppercase tracking-wider text-slate-300 flex items-center gap-2">
+                  <Camera className="w-4 h-4 text-indigo-400" />
                   <span>Visual Inspection Photos ({repair.photos?.length || 0})</span>
                 </h3>
-                <label className="text-[11px] font-semibold text-indigo-400 hover:text-indigo-300 flex items-center gap-1 cursor-pointer">
-                  <Upload className="w-3 h-3" />
+                <label className="text-xs font-bold text-indigo-300 hover:text-indigo-200 flex items-center gap-1.5 cursor-pointer bg-[#19253C] hover:bg-[#20304E] px-3 py-1.5 rounded-xl border border-[#304364] transition-all">
+                  <Upload className="w-3.5 h-3.5" />
                   <span>{uploadingPhoto ? 'Uploading...' : '+ Add Photo'}</span>
                   <input
                     type="file"
@@ -267,49 +267,49 @@ export function RepairDetailModal({
               </div>
 
               {repair.photos && repair.photos.length > 0 ? (
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-3 gap-3">
                   {repair.photos.map((p) => (
                     <a
                       key={p.id}
                       href={p.file_path}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="group relative rounded-lg overflow-hidden border border-slate-800 aspect-square block bg-black"
+                      className="group relative rounded-xl overflow-hidden border border-[#2B3C58] aspect-square block bg-black shadow-sm"
                     >
                       <img
                         src={p.file_path}
                         alt="Board photo"
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                       />
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-[10px] text-white">
+                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-xs font-bold text-white">
                         View Full
                       </div>
                     </a>
                   ))}
                 </div>
               ) : (
-                <p className="text-xs text-slate-500 italic">No board photos attached yet.</p>
+                <p className="text-xs text-slate-400 italic">No board photos attached yet.</p>
               )}
             </div>
 
             {/* Full Provenance Audit Log Timeline */}
-            <div className="space-y-3">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+            <div className="space-y-3.5">
+              <h3 className="text-xs font-black uppercase tracking-wider text-slate-300 flex items-center gap-2">
                 <Clock className="w-4 h-4 text-indigo-400" />
                 <span>Chain of Custody & Audit Timeline</span>
               </h3>
 
-              <div className="space-y-2 border-l-2 border-slate-800 ml-2 pl-4">
+              <div className="space-y-3 border-l-2 border-[#2A3B5A] ml-2 pl-4">
                 {repair.events?.map((evt) => (
-                  <div key={evt.id} className="relative text-xs">
-                    <div className="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full bg-indigo-500 ring-4 ring-[#101624]"></div>
-                    <div className="flex items-center justify-between text-slate-400 text-[11px]">
-                      <span className="font-semibold text-slate-300">{evt.event_type}</span>
-                      <span className="font-mono">{formatDate(evt.created_at)}</span>
+                  <div key={evt.id} className="relative text-sm">
+                    <div className="absolute -left-[23px] top-1.5 w-3 h-3 rounded-full bg-indigo-400 ring-4 ring-[#141E32]"></div>
+                    <div className="flex items-center justify-between text-slate-300 text-xs">
+                      <span className="font-bold text-indigo-200">{evt.event_type}</span>
+                      <span className="font-mono text-slate-400">{formatDate(evt.created_at)}</span>
                     </div>
-                    <p className="text-slate-200 mt-0.5">{evt.description}</p>
+                    <p className="text-slate-100 font-medium mt-1">{evt.description}</p>
                     {evt.performed_by && (
-                      <div className="text-[10px] text-slate-500 mt-0.5">by {evt.performed_by}</div>
+                      <div className="text-xs text-slate-400 mt-0.5">by {evt.performed_by}</div>
                     )}
                   </div>
                 ))}
@@ -322,25 +322,25 @@ export function RepairDetailModal({
           <div className="lg:col-span-5 space-y-4">
             
             {/* Status Card */}
-            <div className="p-4 rounded-xl bg-[#0B0F17] border border-[#1E293B] space-y-3">
+            <div className="p-5 rounded-2xl bg-[#0D1524] border border-[#23334F] space-y-3.5 shadow-sm">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-slate-400">Current Status</span>
-                <div className={`px-2.5 py-0.5 rounded-md text-xs font-semibold border ${statusInfo.bg}`}>
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-300">Current Status</span>
+                <div className={`px-3 py-1 rounded-lg text-xs font-extrabold border shadow-sm ${statusInfo.bg}`}>
                   {statusInfo.label}
                 </div>
               </div>
 
               {/* Quick Action Buttons */}
-              <div className="pt-2 border-t border-slate-800 space-y-2">
+              <div className="pt-3 border-t border-[#1F2D45] space-y-2.5">
                 {isAtVendor && (
                   <button
                     onClick={() => {
                       onClose();
                       onOpenCheckInModal(repair);
                     }}
-                    className="w-full py-2 px-3 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 rounded-xl shadow-md shadow-emerald-600/20 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                    className="w-full py-2.5 px-4 text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-500 rounded-xl shadow-lg shadow-emerald-600/30 transition-all flex items-center justify-center gap-2 cursor-pointer"
                   >
-                    <PackageCheck className="w-4 h-4" />
+                    <PackageCheck className="w-4.5 h-4.5" />
                     <span>Check In Return from Vendor</span>
                   </button>
                 )}
@@ -351,9 +351,9 @@ export function RepairDetailModal({
                       onClose();
                       onOpenDeployModal(repair);
                     }}
-                    className="w-full py-2 px-3 text-xs font-bold text-white bg-amber-600 hover:bg-amber-500 rounded-xl shadow-md shadow-amber-600/20 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                    className="w-full py-2.5 px-4 text-sm font-bold text-white bg-amber-600 hover:bg-amber-500 rounded-xl shadow-lg shadow-amber-600/30 transition-all flex items-center justify-center gap-2 cursor-pointer"
                   >
-                    <ArrowRightLeft className="w-4 h-4" />
+                    <ArrowRightLeft className="w-4.5 h-4.5" />
                     <span>Route 4: Deploy to Customer</span>
                   </button>
                 )}
@@ -363,77 +363,77 @@ export function RepairDetailModal({
                     onClose();
                     onOpenBillingModal(repair);
                   }}
-                  className="w-full py-2 px-3 text-xs font-semibold text-purple-300 bg-purple-950/60 hover:bg-purple-900 border border-purple-800/60 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                  className="w-full py-2.5 px-4 text-sm font-bold text-purple-200 bg-[#251B42] hover:bg-[#32235B] border border-purple-600/70 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm"
                 >
-                  <DollarSign className="w-4 h-4" />
+                  <DollarSign className="w-4.5 h-4.5" />
                   <span>Update Customer Billing / PO</span>
                 </button>
               </div>
             </div>
 
             {/* Vendor & Shipping Card */}
-            <div className="p-4 rounded-xl bg-[#0B0F17] border border-[#1E293B] space-y-2.5 text-xs">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+            <div className="p-5 rounded-2xl bg-[#0D1524] border border-[#23334F] space-y-3 text-sm shadow-sm">
+              <h3 className="text-xs font-black uppercase tracking-wider text-slate-300">
                 Vendor & Shipping Reference
               </h3>
               <div>
-                <div className="text-slate-500 text-[11px]">Vendor</div>
-                <div className="font-semibold text-white">{repair.vendor_name || 'N/A'}</div>
-                {repair.vendor_phone && <div className="text-slate-400">{repair.vendor_phone}</div>}
+                <div className="text-slate-400 text-xs font-semibold">Vendor</div>
+                <div className="font-bold text-white mt-0.5">{repair.vendor_name || 'N/A'}</div>
+                {repair.vendor_phone && <div className="text-slate-300 text-xs mt-0.5">{repair.vendor_phone}</div>}
               </div>
 
-              <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-800">
+              <div className="grid grid-cols-2 gap-3 pt-3 border-t border-[#1F2D45]">
                 <div>
-                  <div className="text-slate-500 text-[11px]">Vendor RMA #</div>
-                  <div className="font-mono font-bold text-slate-200">{repair.vendor_rma_number || '—'}</div>
+                  <div className="text-slate-400 text-xs font-semibold">Vendor RMA #</div>
+                  <div className="font-mono font-bold text-slate-100 mt-0.5">{repair.vendor_rma_number || '—'}</div>
                 </div>
                 <div>
-                  <div className="text-slate-500 text-[11px]">Vendor Invoice</div>
-                  <div className="font-mono text-slate-200">{repair.vendor_invoice_number || '—'}</div>
+                  <div className="text-slate-400 text-xs font-semibold">Vendor Invoice</div>
+                  <div className="font-mono font-bold text-slate-100 mt-0.5">{repair.vendor_invoice_number || '—'}</div>
                 </div>
               </div>
 
               {repair.tracking_outbound && (
-                <div className="pt-2 border-t border-slate-800">
-                  <div className="text-slate-500 text-[11px]">Outbound Tracking</div>
-                  <div className="font-mono text-indigo-400 break-all">{repair.tracking_outbound}</div>
+                <div className="pt-3 border-t border-[#1F2D45]">
+                  <div className="text-slate-400 text-xs font-semibold">Outbound Tracking</div>
+                  <div className="font-mono font-bold text-indigo-300 break-all mt-0.5">{repair.tracking_outbound}</div>
                 </div>
               )}
             </div>
 
             {/* Financial & Billing Card */}
-            <div className="p-4 rounded-xl bg-[#0B0F17] border border-[#1E293B] space-y-2.5 text-xs">
+            <div className="p-5 rounded-2xl bg-[#0D1524] border border-[#23334F] space-y-3 text-sm shadow-sm">
               <div className="flex items-center justify-between">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                <h3 className="text-xs font-black uppercase tracking-wider text-slate-300">
                   Financial Reconciliation
                 </h3>
-                <span className={`px-2 py-0.5 rounded text-[11px] font-semibold border ${billingInfo.bg}`}>
+                <span className={`px-2.5 py-0.5 rounded-lg text-xs font-bold border ${billingInfo.bg}`}>
                   {billingInfo.label}
                 </span>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 font-mono">
+              <div className="grid grid-cols-2 gap-3 font-mono">
                 <div>
-                  <div className="text-slate-500 text-[11px]">Vendor Cost</div>
-                  <div className="text-rose-400 font-bold">{formatCurrency(repair.vendor_cost)}</div>
+                  <div className="text-slate-400 text-xs font-sans font-semibold">Vendor Cost</div>
+                  <div className="text-rose-300 font-extrabold text-base mt-0.5">{formatCurrency(repair.vendor_cost)}</div>
                 </div>
                 <div>
-                  <div className="text-slate-500 text-[11px]">Billed to Customer</div>
-                  <div className="text-emerald-400 font-bold">{formatCurrency(repair.billed_amount)}</div>
+                  <div className="text-slate-400 text-xs font-sans font-semibold">Billed to Customer</div>
+                  <div className="text-emerald-300 font-extrabold text-base mt-0.5">{formatCurrency(repair.billed_amount)}</div>
                 </div>
               </div>
 
-              <div className="pt-2 border-t border-slate-800">
-                <div className="text-slate-500 text-[11px]">Customer PO / Work Order #</div>
-                <div className="font-mono font-bold text-indigo-300 text-sm">{repair.customer_po_wo || 'Not Assigned Yet'}</div>
+              <div className="pt-3 border-t border-[#1F2D45]">
+                <div className="text-slate-400 text-xs font-semibold">Customer PO / Work Order #</div>
+                <div className="font-mono font-extrabold text-indigo-200 text-base mt-0.5">{repair.customer_po_wo || 'Not Assigned Yet'}</div>
               </div>
             </div>
 
             {/* Internal Notes */}
             {repair.internal_notes && (
-              <div className="p-4 rounded-xl bg-[#0B0F17] border border-[#1E293B] space-y-1 text-xs">
-                <div className="text-slate-500 font-semibold uppercase text-[10px]">Internal Notes</div>
-                <p className="text-slate-300 whitespace-pre-line">{repair.internal_notes}</p>
+              <div className="p-5 rounded-2xl bg-[#0D1524] border border-[#23334F] space-y-1.5 text-sm shadow-sm">
+                <div className="text-slate-400 font-black uppercase tracking-wider text-xs">Internal Notes</div>
+                <p className="text-slate-200 font-medium whitespace-pre-line leading-relaxed">{repair.internal_notes}</p>
               </div>
             )}
 
@@ -445,3 +445,5 @@ export function RepairDetailModal({
     </div>
   );
 }
+
+export default RepairDetailModal;

@@ -158,7 +158,7 @@ export function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0B0F17] text-slate-100 flex flex-col selection:bg-indigo-600 selection:text-white">
+    <div className="min-h-screen bg-[#0B111E] text-slate-100 flex flex-col selection:bg-indigo-600 selection:text-white">
       
       {/* Top Header matching reference screenshot */}
       <Header
@@ -172,7 +172,7 @@ export function App() {
       />
 
       {/* Main Content Area */}
-      <main className="max-w-7xl mx-auto w-full px-6 py-6 space-y-6 flex-1">
+      <main className="max-w-[1400px] mx-auto w-full px-6 py-6 space-y-6 flex-1">
         
         {/* Metric Summary Cards matching screenshot */}
         <MetricCards
@@ -214,10 +214,10 @@ export function App() {
       </main>
 
       {/* Clean Footer */}
-      <footer className="border-t border-[#1E293B] py-4 px-6 text-center text-xs text-slate-500 bg-[#0E131F]/60">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+      <footer className="border-t border-[#2A3750] py-4.5 px-6 text-center text-xs font-medium text-slate-400 bg-[#0E1626]">
+        <div className="max-w-[1400px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
           <span>KAEBS Wakarusa • Real-time order insights & lookup</span>
-          <span>Google Sheet (WAKA) Sync Connected</span>
+          <span className="text-slate-300">Google Sheet (WAKA) Sync Connected</span>
         </div>
       </footer>
 

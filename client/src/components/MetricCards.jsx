@@ -8,7 +8,7 @@ export function MetricCards({ stats, activeTab, onSelectTab }) {
       title: 'Total Orders',
       value: stats?.totalRepairs ?? 0,
       icon: TrendingUp,
-      iconColor: 'text-slate-400',
+      iconColor: 'text-indigo-400',
       valueColor: 'text-white'
     },
     {
@@ -16,7 +16,7 @@ export function MetricCards({ stats, activeTab, onSelectTab }) {
       title: 'On Backorder / At Vendor',
       value: stats?.atVendor ?? 0,
       icon: ArrowDownToLine,
-      iconColor: 'text-rose-500',
+      iconColor: 'text-rose-400',
       valueColor: 'text-white'
     },
     {
@@ -47,19 +47,19 @@ export function MetricCards({ stats, activeTab, onSelectTab }) {
           <div
             key={card.id}
             onClick={() => onSelectTab && onSelectTab(card.id)}
-            className={`p-5 rounded-2xl border transition-all cursor-pointer ${
+            className={`p-5 rounded-2xl border transition-all cursor-pointer shadow-md ${
               isSelected
-                ? 'bg-[#141B2D] border-indigo-500/80 shadow-lg shadow-indigo-500/10 ring-1 ring-indigo-500/40'
-                : 'bg-[#101624] border-[#1E293B] hover:border-slate-700 hover:bg-[#131B2C]'
+                ? 'bg-[#182640] border-indigo-400 shadow-indigo-500/20 ring-2 ring-indigo-500/50'
+                : 'bg-[#141E32] border-[#2A3B5A] hover:border-indigo-400/60 hover:bg-[#1A2844]'
             }`}
           >
-            <div className="flex items-center gap-2 text-xs font-semibold text-slate-400 tracking-wide uppercase">
-              <Icon className={`w-3.5 h-3.5 ${card.iconColor}`} />
+            <div className="flex items-center gap-2 text-xs font-bold text-slate-300 tracking-wider uppercase">
+              <Icon className={`w-4 h-4 ${card.iconColor}`} />
               <span>{card.title}</span>
             </div>
 
-            <div className="mt-2.5">
-              <span className="text-3xl font-extrabold tracking-tight text-white font-mono">
+            <div className="mt-3">
+              <span className="text-3xl sm:text-4xl font-black tracking-tight text-white font-mono">
                 {card.value}
               </span>
             </div>

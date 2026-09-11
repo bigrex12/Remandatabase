@@ -39,27 +39,27 @@ export function PrintTagModal({ isOpen, onClose, repair }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm overflow-y-auto">
-      <div className="bg-[#101624] border border-[#1E293B] rounded-2xl w-full max-w-xl shadow-2xl overflow-hidden my-8">
+      <div className="bg-[#141E32] border border-[#2A3B5A] rounded-2xl w-full max-w-xl shadow-2xl overflow-hidden my-8">
         
         {/* Modal Controls (Not printed) */}
-        <div className="px-6 py-4 border-b border-[#1E293B] flex items-center justify-between bg-[#0E131F] print:hidden">
+        <div className="px-6 py-4 border-b border-[#2A3B5A] flex items-center justify-between bg-[#0F1829] print:hidden">
           <div className="flex items-center gap-2">
             <Printer className="w-5 h-5 text-indigo-400" />
-            <h2 className="text-base font-bold text-white">
+            <h2 className="text-lg font-bold text-white">
               Printable Repair & Box Routing Tag
             </h2>
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={handlePrint}
-              className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 rounded-xl shadow-md shadow-indigo-600/30 transition-all cursor-pointer"
+              className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-500 rounded-xl shadow-md shadow-indigo-600/30 transition-all cursor-pointer"
             >
               <Printer className="w-4 h-4" />
               <span>Print Tag (Ctrl+P)</span>
             </button>
             <button
               onClick={onClose}
-              className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors cursor-pointer"
+              className="p-1.5 text-slate-300 hover:text-white rounded-lg hover:bg-slate-800 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -67,7 +67,7 @@ export function PrintTagModal({ isOpen, onClose, repair }) {
         </div>
 
         {/* Printable Card Area */}
-        <div className="p-6 bg-slate-900/60 print:p-0 print:bg-white flex justify-center">
+        <div className="p-6 bg-[#0B111E] print:p-0 print:bg-white flex justify-center">
           <div
             id="printable-tag-area"
             className="w-full max-w-md bg-white text-black p-6 rounded-xl border-2 border-black shadow-lg font-sans space-y-4 print:border-none print:shadow-none print:max-w-none print:w-full"
@@ -75,7 +75,7 @@ export function PrintTagModal({ isOpen, onClose, repair }) {
             {/* Tag Header */}
             <div className="border-b-2 border-black pb-3 flex items-start justify-between">
               <div>
-                <div className="text-[11px] font-extrabold tracking-widest text-slate-800 uppercase">
+                <div className="text-[11px] font-black tracking-widest text-slate-800 uppercase">
                   KAEBS WAKARUSA • REPAIR TAG
                 </div>
                 <div className="text-2xl font-black font-mono tracking-tight text-black mt-0.5">
@@ -88,7 +88,7 @@ export function PrintTagModal({ isOpen, onClose, repair }) {
             {/* Part & Identifiers */}
             <div className="space-y-1">
               <div className="text-xs font-bold uppercase text-slate-600">Part Description</div>
-              <div className="text-base font-extrabold text-black leading-snug">
+              <div className="text-lg font-black text-black leading-snug">
                 {repair.part_name}
               </div>
               <div className="text-xs font-mono font-bold text-slate-800 flex flex-wrap gap-x-4 pt-1">
@@ -107,12 +107,12 @@ export function PrintTagModal({ isOpen, onClose, repair }) {
                 {intended.label}
               </div>
               {repair.intended_return_route === 'FLOAT_STOCK' && (
-                <div className="text-[11px] font-semibold text-slate-700">
+                <div className="text-[11px] font-bold text-slate-700">
                   Hold in Non-Inventoried Shop Float Stock for next customer swap
                 </div>
               )}
               {repair.intended_return_route === 'ORIGINAL_FARMER' && (
-                <div className="text-[11px] font-semibold text-slate-700">
+                <div className="text-[11px] font-bold text-slate-700">
                   Deliver/reinstall to {repair.original_farmer_name || 'Original Farmer'}
                 </div>
               )}
@@ -126,7 +126,7 @@ export function PrintTagModal({ isOpen, onClose, repair }) {
                   {repair.original_farmer_name || 'Stock Inventory'}
                 </div>
                 {repair.original_farmer_code && (
-                  <div className="font-mono text-slate-800">Farm ID: {repair.original_farmer_code}</div>
+                  <div className="font-mono text-slate-800 font-bold">Farm ID: {repair.original_farmer_code}</div>
                 )}
               </div>
 
@@ -136,7 +136,7 @@ export function PrintTagModal({ isOpen, onClose, repair }) {
                   {repair.vendor_name || 'N/A'}
                 </div>
                 {repair.vendor_rma_number && (
-                  <div className="font-mono text-slate-800">RMA: {repair.vendor_rma_number}</div>
+                  <div className="font-mono text-slate-800 font-bold">RMA: {repair.vendor_rma_number}</div>
                 )}
               </div>
             </div>
@@ -145,11 +145,11 @@ export function PrintTagModal({ isOpen, onClose, repair }) {
             <div className="grid grid-cols-2 gap-3 text-xs border-t border-slate-400 pt-2 font-mono">
               <div>
                 <span className="text-slate-600 font-sans text-[10px] uppercase block font-bold">Tech / Pulled By</span>
-                <span className="font-bold">{repair.technician_name}</span>
+                <span className="font-bold text-black">{repair.technician_name}</span>
               </div>
               <div>
                 <span className="text-slate-600 font-sans text-[10px] uppercase block font-bold">Date Shipped</span>
-                <span className="font-bold">{formatDate(repair.date_shipped || repair.date_removed)}</span>
+                <span className="font-bold text-black">{formatDate(repair.date_shipped || repair.date_removed)}</span>
               </div>
             </div>
 
@@ -159,7 +159,7 @@ export function PrintTagModal({ isOpen, onClose, repair }) {
               </div>
             )}
 
-            <div className="text-[9px] text-center text-slate-500 font-mono pt-2 border-t border-slate-300">
+            <div className="text-[10px] text-center text-slate-600 font-mono font-medium pt-2 border-t border-slate-300">
               Tape this tag to anti-static pouch or box. Scribe ticket {repair.ticket_number} onto connector shell.
             </div>
           </div>
