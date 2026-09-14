@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+client/node_modules/
+
+# Production database files (Never commit live production data)
+server/data/*.db
+server/data/*.db-journal
+server/data/*.db-shm
+server/data/*.db-wal
+server/data/*.bak
+
+# Uploaded photo files
+server/uploads/*
+!server/uploads/.gitkeep
+
+# Build outputs
+client/dist/
+
+# Environment and OS files
+.env
+.env.local
+.DS_Store
+Thumbs.db

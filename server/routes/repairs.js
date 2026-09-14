@@ -342,17 +342,22 @@ router.post('/', (req, res) => {
       physical_markings,
       quantity = 1,
       original_farmer_id,
-      intended_return_route = 'ORIGINAL_FARMER',
+      current_farmer_id,
+      intended_return_route = 'FLOAT_STOCK',
       designated_farmer_id,
       vendor_id,
       technician_name,
       status = 'SHIPPED_TO_VENDOR',
       current_location,
+      shelf_bin_location,
       date_removed,
       date_shipped,
+      date_reinstalled,
       vendor_rma_number,
       tracking_outbound,
       customer_po_wo,
+      billed_amount,
+      billing_status,
       initial_symptom,
       internal_notes
     } = req.body;
@@ -366,30 +371,49 @@ router.post('/', (req, res) => {
 
     const ticket_number = generateTicketNumber();
 
-    // Default location string based on status/vendor
+    let activeFarmerId = current_farmer_id || (status === 'INSTALLED_ORIGINAL_FARMER' ? original_farmer_id : null);
+    let resolvedBillingStatus = billing_status || 'PENDING';
     let location = current_location;
-    if (!location) {
-      if (vendor_id) {
-        const v = db.prepare('SELECT name FROM vendors WHERE id = ?').get(vendor_id);
-        location = v ? `Vendor: ${v.name}` : 'Out for Repair';
-      } else {
-        location = 'Parts Department';
+
+    // Default location and billing status based on entry mode/status
+    if (status === 'DEPLOYED_FROM_FLOAT' || status === 'INSTALLED_ORIGINAL_FARMER' || status === 'REASSIGNED_NEW_FARMER') {
+      resolvedBillingStatus = billing_status || 'READY_TO_BILL';
+      if (!location) {
+        if (activeFarmerId) {
+          const f = db.prepare('SELECT farm_name FROM farmers WHERE id = ?').get(activeFarmerId);
+          location = f ? `Installed on Farm: ${f.farm_name}` : 'Deployed to Customer';
+        } else {
+          location = 'Deployed to Customer';
+        }
+      }
+    } else if (status === 'IN_FLOAT_STOCK') {
+      if (!location) {
+        location = shelf_bin_location ? `Shop Shelf: ${shelf_bin_location}` : 'Shop Float Stock (Non-Inventoried)';
+      }
+    } else {
+      if (!location) {
+        if (vendor_id) {
+          const v = db.prepare('SELECT name FROM vendors WHERE id = ?').get(vendor_id);
+          location = v ? `Vendor: ${v.name}` : 'Out for Repair';
+        } else {
+          location = 'Parts Department';
+        }
       }
     }
 
     const stmt = db.prepare(`
       INSERT INTO repairs (
         ticket_number, part_name, part_number, serial_number, pcb_revision, physical_markings,
-        quantity, original_farmer_id, intended_return_route, designated_farmer_id,
-        vendor_id, technician_name, status, current_location,
-        date_removed, date_shipped, vendor_rma_number, tracking_outbound,
-        customer_po_wo, initial_symptom, internal_notes
+        quantity, original_farmer_id, current_farmer_id, intended_return_route, designated_farmer_id,
+        vendor_id, technician_name, status, current_location, shelf_bin_location,
+        date_removed, date_shipped, date_reinstalled, vendor_rma_number, tracking_outbound,
+        customer_po_wo, billed_amount, billing_status, initial_symptom, internal_notes
       ) VALUES (
         ?, ?, ?, ?, ?, ?,
-        ?, ?, ?, ?,
-        ?, ?, ?, ?,
-        ?, ?, ?, ?,
-        ?, ?, ?
+        ?, ?, ?, ?, ?,
+        ?, ?, ?, ?, ?,
+        ?, ?, ?, ?, ?,
+        ?, ?, ?, ?, ?
       )
     `);
 
@@ -402,42 +426,65 @@ router.post('/', (req, res) => {
       physical_markings || null,
       Number(quantity) || 1,
       original_farmer_id || null,
-      intended_return_route || 'ORIGINAL_FARMER',
+      activeFarmerId || null,
+      intended_return_route || 'FLOAT_STOCK',
       designated_farmer_id || null,
       vendor_id || null,
       technician_name.trim(),
       status,
       location,
+      shelf_bin_location || null,
       date_removed || new Date().toISOString().split('T')[0],
-      date_shipped || new Date().toISOString().split('T')[0],
+      (status === 'SHIPPED_TO_VENDOR' ? (date_shipped || new Date().toISOString().split('T')[0]) : (date_shipped || null)),
+      (status === 'DEPLOYED_FROM_FLOAT' || status === 'INSTALLED_ORIGINAL_FARMER' || status === 'REASSIGNED_NEW_FARMER') ? (date_reinstalled || new Date().toISOString().split('T')[0]) : (date_reinstalled || null),
       vendor_rma_number || null,
       tracking_outbound || null,
       customer_po_wo || null,
+      billed_amount !== undefined && billed_amount !== null ? Number(billed_amount) : 0.0,
+      resolvedBillingStatus,
       initial_symptom || null,
       internal_notes || null
     );
 
     const repairId = info.lastInsertRowid;
 
-    // Log creation event with intended route
-    let routeDesc = 'Return to Original Customer';
-    if (intended_return_route === 'FLOAT_STOCK') routeDesc = 'Hold in Float / Reman Stock';
-    if (intended_return_route === 'DESIGNATED_FARMER') routeDesc = 'Designated for another customer';
-
-    logEvent(
-      repairId,
-      'CREATED',
-      `Logged repair ticket ${ticket_number} by ${technician_name}. Intended return route pre-tagged as: ${routeDesc}.`,
-      technician_name
-    );
-
-    if (date_shipped && tracking_outbound) {
+    // Log creation audit event
+    if (status === 'DEPLOYED_FROM_FLOAT' || status === 'INSTALLED_ORIGINAL_FARMER' || status === 'REASSIGNED_NEW_FARMER') {
+      const farmerObj = activeFarmerId ? db.prepare('SELECT farm_name FROM farmers WHERE id = ?').get(activeFarmerId) : null;
+      const farmerLabel = farmerObj ? farmerObj.farm_name : 'Customer';
       logEvent(
         repairId,
-        'SHIPPED',
-        `Dispatched to vendor via tracking #${tracking_outbound}`,
+        'CREATED_AND_DEPLOYED',
+        `Logged part ${ticket_number} and assigned/deployed directly to ${farmerLabel} by ${technician_name}. Work Order/PO: ${customer_po_wo || 'N/A'}. Billed: $${billed_amount || 0}.`,
         technician_name
       );
+    } else if (status === 'IN_FLOAT_STOCK') {
+      logEvent(
+        repairId,
+        'CREATED_IN_STOCK',
+        `Logged part ${ticket_number} directly into Shop Floating Stock at ${shelf_bin_location || 'Shop Shelf'} by ${technician_name}.`,
+        technician_name
+      );
+    } else {
+      let routeDesc = 'Hold in Float / Reman Stock';
+      if (intended_return_route === 'ORIGINAL_FARMER') routeDesc = 'Return to Original Customer';
+      if (intended_return_route === 'DESIGNATED_FARMER') routeDesc = 'Designated for another customer';
+
+      logEvent(
+        repairId,
+        'CREATED',
+        `Logged repair ticket ${ticket_number} by ${technician_name}. Intended return route pre-tagged as: ${routeDesc}.`,
+        technician_name
+      );
+
+      if (date_shipped && tracking_outbound) {
+        logEvent(
+          repairId,
+          'SHIPPED',
+          `Dispatched to vendor via tracking #${tracking_outbound}`,
+          technician_name
+        );
+      }
     }
 
     const createdRepair = db.prepare('SELECT * FROM repairs WHERE id = ?').get(repairId);
