@@ -66,7 +66,7 @@ app.get('/api/health', (req, res) => {
         checked_at TEXT
       )
     `).run();
-    db.prepare('INSERT OR REPLACE INTO _health_check (id, checked_at) VALUES (1, datetime("now"))').run();
+    db.prepare("INSERT OR REPLACE INTO _health_check (id, checked_at) VALUES (1, datetime('now'))").run();
     isWritable = true;
   } catch (err) {
     writeError = err.message;

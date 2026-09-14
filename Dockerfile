@@ -37,7 +37,7 @@ COPY --from=builder /app/client/dist ./client/dist
 # Default persistent storage paths (can be overridden by Cloud Run env vars)
 ENV DATA_DIR=/app/server/data
 ENV UPLOADS_DIR=/app/server/uploads
-ENV SQLITE_JOURNAL_MODE=MEMORY
+ENV SQLITE_JOURNAL_MODE=DELETE
 
 EXPOSE 8080
 

@@ -19,12 +19,15 @@ if (!fs.existsSync(uploadsDir)) {
 const dbPath = path.join(dataDir, 'reman_tracker.db');
 const db = new Database(dbPath, { timeout: 10000 });
 
-// Configure Pragmas optimized for GCS FUSE and Network Mounts
+// Configure Pragmas optimized for persistent storage and production write stability
 try {
-  const journalMode = process.env.SQLITE_JOURNAL_MODE || 'MEMORY';
+  const journalMode = process.env.SQLITE_JOURNAL_MODE || 'DELETE';
   db.pragma(`journal_mode = ${journalMode}`);
 } catch (e) {
   console.log(`Journal mode setting notice: ${e.message}`);
+  try {
+    db.pragma('journal_mode = DELETE');
+  } catch (e2) {}
 }
 
 try {
@@ -257,8 +260,6 @@ function seedInitialData() {
       insertFarmer.run(f.id, f.name, f.address, 'WAKA Farm List');
     }
   }
-
-  // (No sample repairs seeded - production clean slate)
 }
 
 export default db;
