@@ -6,28 +6,52 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const dataDir = process.env.DATA_DIR || path.join(__dirname, 'data');
-if (!fs.existsSync(dataDir)) {
-  fs.mkdirSync(dataDir, { recursive: true });
+// Persistent directory (GCS Fuse Bucket mount or local server data directory)
+const persistentDataDir = process.env.DATA_DIR || path.join(__dirname, 'data');
+if (!fs.existsSync(persistentDataDir)) {
+  try { fs.mkdirSync(persistentDataDir, { recursive: true }); } catch (e) {}
 }
 
 const uploadsDir = process.env.UPLOADS_DIR || path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
+  try { fs.mkdirSync(uploadsDir, { recursive: true }); } catch (e) {}
 }
 
-const dbPath = path.join(dataDir, 'reman_tracker.db');
-const db = new Database(dbPath, { timeout: 10000 });
+const persistentDbPath = path.join(persistentDataDir, 'reman_tracker.db');
 
-// Configure Pragmas optimized for persistent storage and production write stability
-try {
-  const journalMode = process.env.SQLITE_JOURNAL_MODE || 'DELETE';
-  db.pragma(`journal_mode = ${journalMode}`);
-} catch (e) {
-  console.log(`Journal mode setting notice: ${e.message}`);
+// Detect if running on Google Cloud Run, Cloud Run Job, Docker container, or GCS Fuse mount
+export const isCloudRunOrFuse = Boolean(
+  process.env.K_SERVICE || 
+  process.env.CLOUD_RUN_JOB || 
+  process.env.USE_TMP_DB === 'true' || 
+  (process.env.DATA_DIR && (process.env.DATA_DIR.startsWith('/mnt/') || process.env.DATA_DIR.startsWith('/app/') || process.env.DATA_DIR.startsWith('/gcs')))
+);
+
+// Working directory: Use /tmp on Cloud Run/GCS FUSE to provide 100% POSIX-compliant read-write locking speed
+const workingDir = isCloudRunOrFuse ? path.join('/tmp', 'reman_db_working') : persistentDataDir;
+if (!fs.existsSync(workingDir)) {
+  try { fs.mkdirSync(workingDir, { recursive: true }); } catch (e) {}
+}
+
+const workingDbPath = isCloudRunOrFuse ? path.join(workingDir, 'reman_tracker.db') : persistentDbPath;
+
+// Startup Sync: Load existing database from GCS persistent bucket mount into fast working path
+if (isCloudRunOrFuse && fs.existsSync(persistentDbPath)) {
   try {
-    db.pragma('journal_mode = DELETE');
-  } catch (e2) {}
+    fs.copyFileSync(persistentDbPath, workingDbPath);
+    console.log(`✅ Cloud Storage: Sync loaded existing database from GCS bucket (${persistentDbPath}) into working RAM path (${workingDbPath})`);
+  } catch (err) {
+    console.log(`Notice copying DB from GCS bucket: ${err.message}`);
+  }
+}
+
+const db = new Database(workingDbPath, { timeout: 10000 });
+
+// Configure Pragmas
+try {
+  db.pragma('journal_mode = WAL');
+} catch (e) {
+  try { db.pragma('journal_mode = DELETE'); } catch (e2) {}
 }
 
 try {
@@ -38,6 +62,45 @@ try {
 } catch (e) {
   console.log(`Pragma config notice: ${e.message}`);
 }
+
+// Persist working database back to GCS Bucket Mount
+export function syncDbToStorage() {
+  if (!isCloudRunOrFuse) return;
+  try {
+    // Checkpoint WAL journal if active
+    try { db.pragma('wal_checkpoint(RESTART)'); } catch (e) {}
+    
+    if (fs.existsSync(workingDbPath)) {
+      if (!fs.existsSync(persistentDataDir)) {
+        fs.mkdirSync(persistentDataDir, { recursive: true });
+      }
+      fs.copyFileSync(workingDbPath, persistentDbPath);
+      console.log(`💾 Cloud Storage: Persisted database to GCS bucket mount (${persistentDbPath})`);
+    }
+  } catch (err) {
+    console.log(`Notice persisting database to GCS bucket: ${err.message}`);
+  }
+}
+
+let debouncedSyncTimer = null;
+export function scheduleDbSync() {
+  if (!isCloudRunOrFuse) return;
+  if (debouncedSyncTimer) clearTimeout(debouncedSyncTimer);
+  debouncedSyncTimer = setTimeout(() => {
+    syncDbToStorage();
+  }, 1000);
+}
+
+// Graceful container exit sync
+process.on('SIGTERM', () => {
+  console.log('⚡ SIGTERM: Syncing final database state to Cloud Storage bucket...');
+  syncDbToStorage();
+  process.exit(0);
+});
+process.on('SIGINT', () => {
+  syncDbToStorage();
+  process.exit(0);
+});
 
 export function initDatabase() {
   // 1. Farmers table (Matching WAKA Sheet: Farm ID, Farm Name, Address)
@@ -192,6 +255,7 @@ export function initDatabase() {
   `);
 
   seedInitialData();
+  syncDbToStorage();
 }
 
 function seedInitialData() {

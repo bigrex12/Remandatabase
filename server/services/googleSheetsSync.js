@@ -1,5 +1,5 @@
 import Papa from 'papaparse';
-import db from '../db.js';
+import db, { scheduleDbSync } from '../db.js';
 
 /**
  * Normalizes Google Sheet URL into a direct CSV export endpoint
@@ -143,6 +143,8 @@ export function upsertFarmersFromRows(rows) {
     WHERE id = 1
   `).run(totalCount);
 
+  scheduleDbSync();
+
   return { added, updated, total: totalCount };
 }
 
@@ -196,6 +198,7 @@ export async function syncFromGoogleSheet(customUrl = null) {
           error_message = ?
       WHERE id = 1
     `).run(error.message);
+    scheduleDbSync();
     throw error;
   }
 }
